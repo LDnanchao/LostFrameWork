@@ -22,7 +22,7 @@ namespace LostFramework
         private void Update()
         {
             SetFace();
-            if(characterAnimator!=null) characterAnimator.SetFloat("Speed",_rigidbody2D.velocity.magnitude);
+            if(characterAnimator!=null) characterAnimator.SetFloat("Speed",_rigidbody2D.linearVelocity.magnitude);
         }
 
         private void FixedUpdate()
@@ -42,7 +42,7 @@ namespace LostFramework
                     inputAxis = inputAxis;
                     break;
             }
-            _rigidbody2D.velocity = inputAxis;
+            _rigidbody2D.linearVelocity = inputAxis;
             if (inputAxis.x > 0)
             {
                 faceRight = true;

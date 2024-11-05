@@ -10,11 +10,17 @@ namespace LostFramework
         public string InventoryName { get; set; }
         public bool AutoRemoveEmpty { get; set; }
         public bool Unlimited { get; set; }
-        
-
+        public List<InventoryItem> Items => _inventoryItems;
         private List<InventoryItem> _inventoryItems = new List<InventoryItem>();
         private int _maxSize;
 
+        public Inventory(string playerID,string inventoryName,bool unlimited,int maxSize)
+        {
+            PlayerID = playerID;
+            InventoryName = inventoryName;
+            Unlimited = unlimited;
+            _maxSize = maxSize;
+        }
         /// <summary>
         /// 当前库存不支持重复占位，为无限堆叠
         /// </summary>
@@ -47,8 +53,10 @@ namespace LostFramework
             if (index != -1)
             {
                 var item = itemToAdd.Copy();
-                item.Quantity = quantity;
                 _inventoryItems[index] = item;
+                _inventoryItems[index].OwnInventory = this;
+                _inventoryItems[index].Quantity += quantity;
+                _inventoryItems[index].Index = index;
                 InventoryEvent.Trigger(InventoryEventType.ContentChanged,InventoryName,_inventoryItems[index],quantity,index,PlayerID);
                 return  true;
             }
@@ -57,9 +65,11 @@ namespace LostFramework
             if (Unlimited ||_inventoryItems.Count < _maxSize)
             {
                 var item = itemToAdd.Copy();
-                item.Quantity = quantity;
                 _inventoryItems.Add(item);
                 index = _inventoryItems.Count - 1;
+                _inventoryItems[index].OwnInventory = this;
+                _inventoryItems[index].Quantity += quantity;
+                _inventoryItems[index].Index = index;
                 InventoryEvent.Trigger(InventoryEventType.ContentChanged,InventoryName,_inventoryItems[index],quantity,index,PlayerID);
                 return  true;
             }
@@ -75,7 +85,9 @@ namespace LostFramework
             if (_inventoryItems[destinationIndex] == null)
             {
                 _inventoryItems[destinationIndex] = itemToAdd.Copy();
+                _inventoryItems[destinationIndex].OwnInventory = this;
                 _inventoryItems[destinationIndex].Quantity = quantity;
+                _inventoryItems[destinationIndex].Index = destinationIndex;
                 InventoryEvent.Trigger(InventoryEventType.ContentChanged,InventoryName,_inventoryItems[destinationIndex],quantity,destinationIndex,PlayerID);
                 return  true;
             }
@@ -173,21 +185,44 @@ namespace LostFramework
             {
                 targetItem.Quantity -= quantity;
             }
-
+            InventoryEvent.Trigger(InventoryEventType.ContentChanged,InventoryName,targetItem,-quantity,index,PlayerID);
             if (targetItem.Quantity <= 0)
             {
                 _inventoryItems[index] = null;
+                RemoveEmptyIfUnlimited(index);
             }
-            InventoryEvent.Trigger(InventoryEventType.ContentChanged,InventoryName,targetItem,-quantity,index,PlayerID);
+
             return true;
         }
 
         public bool DestroyItem(int i)
         {
             if (i >= _inventoryItems.Count) return false;
+            var tempItem = _inventoryItems[i];
             _inventoryItems[i] = null;
-            InventoryEvent.Trigger(InventoryEventType.Destroy,InventoryName,_inventoryItems[i],0,i,PlayerID);
+            InventoryEvent.Trigger(InventoryEventType.Destroy,InventoryName,tempItem,0,i,PlayerID);
+            RemoveEmptyIfUnlimited(i);
             return true;
+        }
+
+        private void RemoveEmptyIfUnlimited(int index)
+        {
+            if (Unlimited)
+            {
+                _inventoryItems.RemoveAt(index);
+                InventoryEvent.Trigger(InventoryEventType.Redraw,InventoryName,null,0,index,PlayerID);
+            }
+
+            RefreshIndex();
+        }
+
+        private void RefreshIndex()
+        {
+            //刷新下标
+            for (int i = 0; i < _inventoryItems.Count; i++)
+            {
+                _inventoryItems[i].Index = i;
+            }
         }
 
         public void EmptyInventory()
@@ -198,6 +233,13 @@ namespace LostFramework
                 _inventoryItems[i] = null;
                 InventoryEvent.Trigger(InventoryEventType.Destroy,InventoryName,target,0,i,PlayerID);
             }
+
+            if (Unlimited)
+            {
+                _inventoryItems.Clear();
+                InventoryEvent.Trigger(InventoryEventType.Redraw,InventoryName,null,0,-1,PlayerID);
+            }
+            
         }
 
         public int CapMaxQuantity(InventoryItem itemToAdd, int newQuantity)
@@ -226,6 +268,8 @@ namespace LostFramework
             _inventoryItems.Clear();
             _inventoryItems = newList;
             _maxSize = newSize;
+            RefreshIndex();
+            InventoryEvent.Trigger(InventoryEventType.Redraw,InventoryName,null,0,-1,PlayerID);
         }
 
         public int GetQuantity(string searchedItemID)

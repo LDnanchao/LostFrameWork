@@ -163,7 +163,7 @@ namespace LostFramework
 			
 			for (int i=list.Count-1; i >= 0; i--)
 			{
-				( list[i] as ILEventListener<LEvent> ).OnMMEvent( newEvent );
+				( list[i] as ILEventListener<LEvent> ).OnLEvent( newEvent );
 			}
 		}
 
@@ -222,7 +222,7 @@ namespace LostFramework
 	/// </summary>
 	public interface ILEventListener<T> : LEventListenerBase
 	{
-		void OnMMEvent( T eventType );
+		void OnLEvent( T eventType );
 	}
 
 	public class ILEventListenerWrapper<TOwner, TTarget, TEvent> : ILEventListener<TEvent>, IDisposable
@@ -245,7 +245,7 @@ namespace LostFramework
 		}
 
 		protected virtual TTarget OnEvent(TEvent eventType) => default;
-		public void OnMMEvent(TEvent eventType)
+		public void OnLEvent(TEvent eventType)
 		{
 			var item = OnEvent(eventType);
 			_callback?.Invoke(item);

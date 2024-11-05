@@ -1,89 +1,123 @@
 ﻿using System;
 using System.Collections.Generic;
+using QFramework;
 using UnityEngine;
 
 namespace LostFramework
 {
     public class InventoryDisplay:MonoBehaviour,IInventoryDisplay,ILEventListener<InventoryEvent>
     {
-        public IInventory inventory;
         public List<InventorySlot> SlotContainer { get;protected set; }
-        protected InventorySlot _currentlySelectedSlot;
-        private void Start()
+        public InventorySlot prefabSlot;
+        private SimpleObjectPool<InventorySlot> slotPool;
+        private IInventory _inventory;
+        public IInventory inventory
         {
+            get=>_inventory;
+            set
+            {
+                _inventory = value;
+                if (inventory != null)
+                {
+                    UpdateInventory();
+                }
+            }
+        }
+
+        public virtual void Awake()
+        {
+            SlotContainer = new List<InventorySlot>();
+            slotPool = new SimpleObjectPool<InventorySlot>(() =>
+                {
+                    var newItem = Instantiate(prefabSlot, prefabSlot.transform.parent, true);
+                    newItem.gameObject.SetActive(false);
+                    newItem.transform.SetAsLastSibling();
+                    newItem.Clear();
+                    return newItem;
+                },
+                (item) =>
+                {
+                    item.gameObject.SetActive(false);
+                    item.transform.SetAsLastSibling();
+                    item.Clear();
+                }, 10);
             if (inventory != null)
             {
                 UpdateInventory();
             }
         }
         
-        public void OnMMEvent(InventoryEvent eventType)
-        {
-	        throw new NotImplementedException();
-        }
-        private void OnEnable()
+       
+        public virtual void OnEnable()
         {
 	        this.LEventStartListening();
         }
 
-        private void OnDisable()
+        public virtual void OnDisable()
         {
 	        this.LEventStopListening();
         }
-
-        private void UpdateInventory()
+        
+        public void OnLEvent(InventoryEvent eventType)
         {
-	        throw new NotImplementedException();
+            if(inventory==null)
+                return;
+            if(inventory.InventoryName != eventType.TargetInventoryName || inventory.PlayerID != eventType.PlayerID)
+                return;
+            switch (eventType.InventoryEventType)
+            {
+                case InventoryEventType.ContentChanged:
+                    OnInventoryContentChanged(eventType.EventItem, eventType.Index, eventType.Quantity);
+                    break;
+                case InventoryEventType.Redraw:
+                    UpdateInventory();
+                    break;
+                default:
+                    break;
+            }
+        }
+        public void UpdateInventory()
+        {
+            prefabSlot.gameObject.SetActive(false);
+            //刷新库存UI，同时会整理GO
+            if(inventory==null)
+                return;
+            //多余的slot进行释放
+            if (SlotContainer.Count > inventory.Items.Count)
+            {
+                for (int i = SlotContainer.Count - 1; i >= inventory.Items.Count; i--)
+                {
+                    slotPool.Recycle(SlotContainer[i]);
+                    SlotContainer.RemoveAt(i);
+                }
+            }
+            
+            //以此渲染inventory的数据
+            for (int i = 0; i < inventory.Items.Count; i++)
+            {
+                if (i >= SlotContainer.Count)
+                {
+                    var newSlot = slotPool.Allocate();
+                    newSlot.gameObject.SetActive(true);
+                    SlotContainer.Add(newSlot);
+                }
+                SlotContainer[i].ShowItem(inventory.Items[i]);
+                SlotContainer[i].inventory = inventory;
+            }
         }
 
-        public void SetInventory(Inventory inventory)
+        public void OnInventoryContentChanged(InventoryItem item, int index, int quantity)
         {
-            this.inventory = inventory;
-            UpdateInventory();
+            if (SlotContainer.Count <= index)
+            {
+                for (int i = SlotContainer.Count; i <= index; i++)
+                {
+                    var newSlot = slotPool.Allocate();
+                    newSlot.gameObject.SetActive(true);
+                    SlotContainer.Add(newSlot);
+                }
+            }
+            SlotContainer[index].UpdateItem(inventory.Items[index], quantity);
         }
-       
-        /// <summary>
-		/// 返回当前选定的库存槽
-		/// </summary>
-		/// <returns>所选库存槽.</returns>
-		public virtual InventorySlot CurrentlySelectedInventorySlot()
-		{
-			return  _currentlySelectedSlot;
-		}
-
-		/// <summary>		
-		/// 将焦点设置在清单的第一项上	
-		/// </summary>		
-		public virtual void Focus()
-		{
-		}
-		/// <summary>
-		/// 设置当前选定的插槽
-		/// </summary>
-		/// <param name="slot">Slot.</param>
-		public virtual void SetCurrentlySelectedSlot(InventorySlot slot)
-		{
-			_currentlySelectedSlot = slot;
-		}
-		
-
-		/// <summary>
-		/// Disables all the slots in the inventory display, except those from a certain class
-		/// </summary>
-		/// <param name="itemClass">Item class.</param>
-		public virtual void DisableAllBut(ItemClasses itemClass)
-		{
-			throw  new NotImplementedException();
-		}
-
-		/// <summary>
-		/// Enables back all slots (usually after having disabled some of them)
-		/// </summary>
-		public virtual void ResetDisabledStates()
-		{
-			throw  new NotImplementedException();
-		}
-
-		
     }
 }

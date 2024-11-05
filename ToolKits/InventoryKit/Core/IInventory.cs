@@ -16,6 +16,9 @@ namespace LostFramework
         public bool AutoRemoveEmpty { get; set; }
         ///是否为无限制空间
         public bool Unlimited { get; set; }
+
+        public List<InventoryItem> Items { get; }
+
         /// <summary>
         /// 添加道具
         /// </summary>

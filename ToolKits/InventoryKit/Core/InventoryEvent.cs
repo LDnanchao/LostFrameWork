@@ -1,29 +1,23 @@
-﻿namespace LostFramework
+﻿using UnityEngine;
+
+namespace LostFramework
 {
     public enum InventoryEventType
     {
-        Pick, 
         Select, 
         Click, 
         Move, 
-        UseRequest, 
-        ItemUsed, 
-        EquipRequest, 
-        ItemEquipped, 
-        UnEquipRequest, 
-        ItemUnEquipped, 
         Drop, 
         Destroy, 
         Error, 
+        /// <summary>
+        /// 重新绘制
+        /// </summary>
         Redraw, 
         /// <summary>
         /// 内容变化
         /// </summary>
         ContentChanged, 
-        InventoryOpens, 
-        InventoryCloseRequest, 
-        InventoryCloses, 
-        InventoryLoaded
     }
     public struct InventoryEvent
     {

@@ -1,4 +1,18 @@
 {
-	"name": "InventoryKit",
-	"references":[ "GUID:204ed506d63b10044a13bf6ad4dda2f7" ]
+    "name": "InventoryKit",
+    "rootNamespace": "",
+    "references": [
+        "LostFramework.Core",
+        "QFramework.CoreKit",
+        "QFramework"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

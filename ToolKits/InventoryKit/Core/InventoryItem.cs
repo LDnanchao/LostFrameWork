@@ -11,6 +11,8 @@ namespace LostFramework
         //当前数量
         public int Quantity;
         public ItemClasses ItemClass;
+        public IInventory OwnInventory;
+        public int Index;
         public InventoryItem(){}
         public  InventoryItem(string itemID, int maxQuantity)
         {
@@ -18,7 +20,7 @@ namespace LostFramework
             MaxQuantity = maxQuantity;
         }
 
-        public InventoryItem Copy()
+        public virtual InventoryItem Copy()
         {
             InventoryItem tempItem = new InventoryItem();
             tempItem.ItemID = ItemID;
