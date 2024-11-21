@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using QFramework;
 using UnityEngine;
+using UnityEngine.Pool;
 
 namespace LostFramework
 {
@@ -9,7 +9,7 @@ namespace LostFramework
     {
         public List<InventorySlot> SlotContainer { get;protected set; }
         public InventorySlot prefabSlot;
-        private SimpleObjectPool<InventorySlot> slotPool;
+        private ObjectPool<InventorySlot> slotPool;
         private IInventory _inventory;
         public IInventory inventory
         {
@@ -27,7 +27,7 @@ namespace LostFramework
         public virtual void Awake()
         {
             SlotContainer = new List<InventorySlot>();
-            slotPool = new SimpleObjectPool<InventorySlot>(() =>
+            slotPool = new ObjectPool<InventorySlot>(() =>
                 {
                     var newItem = Instantiate(prefabSlot, prefabSlot.transform.parent, true);
                     newItem.gameObject.SetActive(false);
@@ -40,7 +40,7 @@ namespace LostFramework
                     item.gameObject.SetActive(false);
                     item.transform.SetAsLastSibling();
                     item.Clear();
-                }, 10);
+                });
             if (inventory != null)
             {
                 UpdateInventory();
@@ -87,7 +87,7 @@ namespace LostFramework
             {
                 for (int i = SlotContainer.Count - 1; i >= inventory.Items.Count; i--)
                 {
-                    slotPool.Recycle(SlotContainer[i]);
+                    slotPool.Release(SlotContainer[i]);
                     SlotContainer.RemoveAt(i);
                 }
             }
@@ -97,7 +97,7 @@ namespace LostFramework
             {
                 if (i >= SlotContainer.Count)
                 {
-                    var newSlot = slotPool.Allocate();
+                    var newSlot = slotPool.Get();
                     newSlot.gameObject.SetActive(true);
                     SlotContainer.Add(newSlot);
                 }
@@ -112,7 +112,7 @@ namespace LostFramework
             {
                 for (int i = SlotContainer.Count; i <= index; i++)
                 {
-                    var newSlot = slotPool.Allocate();
+                    var newSlot = slotPool.Get();
                     newSlot.gameObject.SetActive(true);
                     SlotContainer.Add(newSlot);
                 }

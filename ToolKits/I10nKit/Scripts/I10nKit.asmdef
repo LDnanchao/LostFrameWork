@@ -2,11 +2,8 @@
     "name": "I10nKit",
     "rootNamespace": "LostFramework",
     "references": [
-        "QFramework.CoreKit",
-        "QFramework",
         "I2.Core",
-        "Unity.TextMeshPro",
-        "ResKit"
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -17,6 +14,5 @@
     "defineConstraints": [
         "ENBALE_I2"
     ],
-    "versionDefines": [],
     "noEngineReferences": false
 }

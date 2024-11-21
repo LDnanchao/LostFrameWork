@@ -170,6 +170,7 @@ namespace LostFramework
             if (_inventoryItems[i].Quantity <= 0)
             {
                 _inventoryItems[i] = null;
+                RemoveEmptyIfUnlimited(i);
             }
             InventoryEvent.Trigger(InventoryEventType.ContentChanged,InventoryName,targetItem,-quantity,i,PlayerID);
             return true;
