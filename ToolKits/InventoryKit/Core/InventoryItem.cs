@@ -2,6 +2,9 @@ using System;
 
 namespace LostFramework
 {
+    /// <summary>
+    /// 背包Item
+    /// </summary>
     public class InventoryItem
     {
         //id
