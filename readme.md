@@ -23,12 +23,10 @@
 - [ ] 编辑器功能
   - [ ] 功能模块开关
 - [ ] Feel
-- [ ] 联网功能
-  - [ ] UDP
-  - [ ] TCP
-  - [ ] KCP
-  - [ ] RPC
-  - [ ] Websocket
-  - [ ] p2p
-  - [ ] 帧同步
-  - [ ] 状态同步
+- [ ] 网络框架
+  - [ ] 集成GeekServer
+- [x] 通用方案 需要自行接入
+  如QFramework、ET、GameFramework都是不错的框架
+
+#### UI库扩展
+- [ ] 通用加载进度条
