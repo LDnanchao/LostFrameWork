@@ -19,7 +19,7 @@ namespace LostFramework
 		public static void Trigger(string newName)
 		{
 			e.EventName = newName;
-			LEventManager.TriggerEvent(e);
+			EventManager.TriggerEvent(e);
 		}
 	}
     
@@ -61,19 +61,19 @@ namespace LostFramework
 	/// will catch all events of type MMGameEvent emitted from anywhere in the game, and do something if it's named GameOver
 	/// </summary>
 	[ExecuteAlways]
-	public static class LEventManager 
+	public static class EventManager 
 	{
-		private static Dictionary<Type, List<LEventListenerBase>> _subscribersList;
+		private static Dictionary<Type, List<EventListenerBase>> _subscribersList;
 		
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 		static void InitializeStatics()
 		{
-			_subscribersList = new Dictionary<Type, List<LEventListenerBase>>();
+			_subscribersList = new Dictionary<Type, List<EventListenerBase>>();
 		}
 
-		static LEventManager()
+		static EventManager()
 		{
-			_subscribersList = new Dictionary<Type, List<LEventListenerBase>>();
+			_subscribersList = new Dictionary<Type, List<EventListenerBase>>();
 		}
 
 		/// <summary>
@@ -81,13 +81,13 @@ namespace LostFramework
 		/// </summary>
 		/// <param name="listener">listener.</param>
 		/// <typeparam name="LEvent">The event type.</typeparam>
-		public static void AddListener<LEvent>( ILEventListener<LEvent> listener ) where LEvent : struct
+		public static void AddListener<LEvent>( IEventListener<LEvent> listener ) where LEvent : struct
 		{
 			Type eventType = typeof( LEvent );
 
 			if (!_subscribersList.ContainsKey(eventType))
 			{
-				_subscribersList[eventType] = new List<LEventListenerBase>();
+				_subscribersList[eventType] = new List<EventListenerBase>();
 			}
 
 			if (!SubscriptionExists(eventType, listener))
@@ -101,7 +101,7 @@ namespace LostFramework
 		/// </summary>
 		/// <param name="listener">listener.</param>
 		/// <typeparam name="LEvent">The event type.</typeparam>
-		public static void RemoveListener<LEvent>( ILEventListener<LEvent> listener ) where LEvent : struct
+		public static void RemoveListener<LEvent>( IEventListener<LEvent> listener ) where LEvent : struct
 		{
 			Type eventType = typeof( LEvent );
 
@@ -114,7 +114,7 @@ namespace LostFramework
 				#endif
 			}
 
-			List<LEventListenerBase> subscriberList = _subscribersList[eventType];
+			List<EventListenerBase> subscriberList = _subscribersList[eventType];
 
 			#if EVENTROUTER_THROWEXCEPTIONS
 	            bool listenerFound = false;
@@ -153,7 +153,7 @@ namespace LostFramework
 		/// <typeparam name="LEvent">The 1st type parameter.</typeparam>
 		public static void TriggerEvent<LEvent>( LEvent newEvent ) where LEvent : struct
 		{
-			List<LEventListenerBase> list;
+			List<EventListenerBase> list;
 			if( !_subscribersList.TryGetValue( typeof( LEvent ), out list ) )
 				#if EVENTROUTER_REQUIRELISTENER
 			            throw new ArgumentException( string.Format( "Attempting to send event of type \"{0}\", but no listener for this type has been found. Make sure this.Subscribe<{0}>(EventRouter) has been called, or that all listeners to this event haven't been unsubscribed.", typeof( MMEvent ).ToString() ) );
@@ -163,7 +163,7 @@ namespace LostFramework
 			
 			for (int i=list.Count-1; i >= 0; i--)
 			{
-				( list[i] as ILEventListener<LEvent> ).OnLEvent( newEvent );
+				( list[i] as IEventListener<LEvent> ).OnLEvent( newEvent );
 			}
 		}
 
@@ -173,9 +173,9 @@ namespace LostFramework
 		/// <returns><c>true</c>, if exists was subscriptioned, <c>false</c> otherwise.</returns>
 		/// <param name="type">Type.</param>
 		/// <param name="receiver">Receiver.</param>
-		private static bool SubscriptionExists( Type type, LEventListenerBase receiver )
+		private static bool SubscriptionExists( Type type, EventListenerBase receiver )
 		{
-			List<LEventListenerBase> receivers;
+			List<EventListenerBase> receivers;
 
 			if( !_subscribersList.TryGetValue( type, out receivers ) ) return false;
 
@@ -201,37 +201,37 @@ namespace LostFramework
 	{
 		public delegate void Delegate<T>( T eventType );
 
-		public static void LEventStartListening<EventType>( this ILEventListener<EventType> caller ) where EventType : struct
+		public static void EventStartListening<EventType>( this IEventListener<EventType> caller ) where EventType : struct
 		{
-			LEventManager.AddListener<EventType>( caller );
+			EventManager.AddListener<EventType>( caller );
 		}
 
-		public static void LEventStopListening<EventType>( this ILEventListener<EventType> caller ) where EventType : struct
+		public static void EventStopListening<EventType>( this IEventListener<EventType> caller ) where EventType : struct
 		{
-			LEventManager.RemoveListener<EventType>( caller );
+			EventManager.RemoveListener<EventType>( caller );
 		}
 	}
 
 	/// <summary>
 	/// Event listener basic interface
 	/// </summary>
-	public interface LEventListenerBase { };
+	public interface EventListenerBase { };
 
 	/// <summary>
 	/// A public interface you'll need to implement for each type of event you want to listen to.
 	/// </summary>
-	public interface ILEventListener<T> : LEventListenerBase
+	public interface IEventListener<T> : EventListenerBase
 	{
 		void OnLEvent( T eventType );
 	}
 
-	public class ILEventListenerWrapper<TOwner, TTarget, TEvent> : ILEventListener<TEvent>, IDisposable
+	public class IEventListenerWrapper<TOwner, TTarget, TEvent> : IEventListener<TEvent>, IDisposable
 		where TEvent : struct
 	{
 		private Action<TTarget> _callback;
 
 		private TOwner _owner;
-		public ILEventListenerWrapper(TOwner owner, Action<TTarget> callback)
+		public IEventListenerWrapper(TOwner owner, Action<TTarget> callback)
 		{
 			_owner = owner;
 			_callback = callback;
@@ -255,11 +255,11 @@ namespace LostFramework
 		{
 			if (b)
 			{
-				this.LEventStartListening<TEvent>();
+				this.EventStartListening<TEvent>();
 			}
 			else
 			{
-				this.LEventStopListening<TEvent>();
+				this.EventStopListening<TEvent>();
 			}
 		}
 	}

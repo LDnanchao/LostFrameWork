@@ -5,7 +5,7 @@ using UnityEngine.Pool;
 
 namespace LostFramework
 {
-    public class InventoryDisplay:MonoBehaviour,IInventoryDisplay,ILEventListener<InventoryEvent>
+    public class InventoryDisplay:MonoBehaviour,IInventoryDisplay,IEventListener<InventoryEvent>
     {
         public List<InventorySlot> SlotContainer { get;protected set; }
         public InventorySlot prefabSlot;
@@ -50,12 +50,12 @@ namespace LostFramework
        
         public virtual void OnEnable()
         {
-	        this.LEventStartListening();
+	        this.EventStartListening();
         }
 
         public virtual void OnDisable()
         {
-	        this.LEventStopListening();
+	        this.EventStopListening();
         }
         
         public void OnLEvent(InventoryEvent eventType)

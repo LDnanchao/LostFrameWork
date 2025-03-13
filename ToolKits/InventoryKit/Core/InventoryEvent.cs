@@ -53,7 +53,7 @@ namespace LostFramework
             e.Quantity = quantity;
             e.Index = index;
             e.PlayerID = (playerID != "") ? playerID : "Player1";
-            LEventManager.TriggerEvent(e);
+            EventManager.TriggerEvent(e);
         }
     }
 }
