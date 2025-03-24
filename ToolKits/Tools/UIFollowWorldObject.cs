@@ -1,5 +1,5 @@
 /**
- * summary:在使用Camera的worldToScreenPoint存在一些问题，即非平面情况下，超出屏幕外，坐标会不准确
+ * summary:鍦ㄤ娇鐢–amera鐨剋orldToScreenPoint瀛樺湪涓�浜涢棶棰橈紝鍗抽潪骞抽潰鎯呭喌涓嬶紝瓒呭嚭灞忓箷澶栵紝鍧愭爣浼氫笉鍑嗙‘
  * author:ldnanchao
  * copy:https://blog.csdn.net/qq_52855744/article/details/121608886
  * */
@@ -7,7 +7,7 @@ using UnityEngine;
 namespace LostFramework
 {
     /// <summary>
-    /// UI跟随脚本
+    /// UI璺熼殢鑴氭湰
     /// </summary>
     public class UIFollowWorldObject : MonoBehaviour
     {
