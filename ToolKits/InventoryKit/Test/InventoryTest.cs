@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace LostFramework
+namespace Lost
 {
     public class InventoryTest
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
-namespace LostFramework
+namespace Lost
 {
     public class InventoryDisplay:MonoBehaviour,IInventoryDisplay,IEventListener<InventoryEvent>
     {

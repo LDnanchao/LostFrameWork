@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace LostFramework
+namespace Lost
 {
     /// <summary>
     /// 不持有数据，由InventoryDisplay进行管理

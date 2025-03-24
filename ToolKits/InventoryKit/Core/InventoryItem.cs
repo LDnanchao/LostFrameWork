@@ -1,6 +1,6 @@
 using System;
 
-namespace LostFramework
+namespace Lost
 {
     /// <summary>
     /// 背包Item

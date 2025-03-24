@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LostFramework
+namespace Lost
 {
     //需要支持事件
     public class Inventory:IInventory

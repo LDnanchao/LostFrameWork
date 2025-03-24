@@ -1,4 +1,4 @@
-﻿namespace LostFramework
+﻿namespace Lost
 {
     public interface IInventoryDisplay
     {

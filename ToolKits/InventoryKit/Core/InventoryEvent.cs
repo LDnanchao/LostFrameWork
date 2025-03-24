@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace LostFramework
+namespace Lost
 {
     public enum InventoryEventType
     {

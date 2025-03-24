@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace LostFramework
+namespace Lost
 {
     public interface IInventory
     {

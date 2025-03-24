@@ -8,11 +8,10 @@ public class LogToFile : MonoBehaviour
 {
     public int logRetentionHours = 24; // 设置日志保留时间（小时），默认24小时
     private string logFilePath;
-    private int logIntervalInSeconds = 5; // 设置日志输出间隔（秒）
     private int cleanupIntervalInSeconds = 3600; // 设置清理间隔（秒），例如1小时
 
     void OnEnable()
-    {
+    { 
         // 获取当前启动时间
         string startTime = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         // 设置不同平台的日志文件路径
