@@ -4,15 +4,17 @@ using Lost.Character;
 using UnityEngine;
 namespace Lost.AI
 {
-    public partial class AIControllerBase : MonoBehaviour
+    public class AIControllerBase : MonoBehaviour
     {
-        protected CharacterControllerBase characterController;
-       
-        void Update()
+        public CharacterControllerBase characterController;
+        public string aiType;
+        public string currentState;
+        public virtual void Update()
         {
             if (isRunAI)
             {
                 _aiFSM.Update();
+                currentState = _aiFSM.GetCurrentState();
             }
 
             if (isMoving)
@@ -79,6 +81,7 @@ namespace Lost.AI
         public void RunAI(IAIFSM aiFSM)
         {
             _aiFSM = aiFSM;
+            aiType = _aiFSM.GetType().FullName;
             _aiFSM.Start();
             isRunAI = true;
         }

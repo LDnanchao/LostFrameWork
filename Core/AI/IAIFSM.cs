@@ -8,6 +8,7 @@ namespace Lost.AI
 
         public void Update();
         public void Stop();
+        public string GetCurrentState();
         public AIControllerBase GetAIController();
     }
 }
