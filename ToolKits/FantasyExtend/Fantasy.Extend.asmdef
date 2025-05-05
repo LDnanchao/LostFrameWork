@@ -1,0 +1,24 @@
+{
+    "name": "Fantasy.Extend",
+    "rootNamespace": "",
+    "references": [
+        "ResKit"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "FANTASY"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.fantasy.configtable",
+            "expression": "",
+            "define": "FANTASY"
+        }
+    ],
+    "noEngineReferences": false
+}
