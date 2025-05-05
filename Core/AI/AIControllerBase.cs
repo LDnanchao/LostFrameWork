@@ -8,6 +8,7 @@ namespace Lost.AI
     {
         public CharacterControllerBase characterController;
         public string aiType;
+        [HideInInspector]
         public string currentState;
         public virtual void Update()
         {
