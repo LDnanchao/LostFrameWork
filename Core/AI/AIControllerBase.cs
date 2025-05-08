@@ -17,13 +17,13 @@ namespace Lost.AI
                 _aiFSM.Update();
                 currentState = _aiFSM.GetCurrentState();
             }
-
+ 
             if (isMoving)
             {
                 Vector3 direction = isPositionTarget ? targetPosition - transform.position : targetTransform.position - transform.position;
                 characterController.Move(direction.normalized);
 
-                if (Vector3.Distance(transform.position, isPositionTarget ? targetPosition : targetTransform.position) < 0.1f)
+                if (Vector3.Distance(transform.position, isPositionTarget ? targetPosition : targetTransform.position) < distance)
                 {
                     MoveComplete();
                 }
@@ -43,8 +43,10 @@ namespace Lost.AI
         private bool isPositionTarget = false;
         private Vector3 targetPosition;
         private Transform targetTransform;
-        public void MoveToTarget(Transform target)
+        float distance = 0.1f;
+        public void MoveToTarget(Transform target,float distance = 0.1f)
         {
+            this.distance = distance;
             isMoving = true;
             isPositionTarget = false;
             targetTransform = target;

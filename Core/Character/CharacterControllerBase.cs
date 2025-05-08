@@ -17,7 +17,7 @@ namespace Lost.Character
         /// <summary>
         /// 是否存活
         /// </summary>
-        public bool isLive = true;
+        public virtual bool isLive { get; } = true;
 
 
        
