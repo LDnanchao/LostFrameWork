@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 
 namespace Lost.Ability
 {
     public interface IAbilitySystemComponent
     {
-        public List<AbilityTag> GetAbilityTags();
+        public List<string> GetAbilityTags();
         /// <summary>
         /// 赋予技能，返回技能句柄，通过句柄可以释放技能
         /// </summary>
@@ -62,6 +63,9 @@ namespace Lost.Ability
         /// </summary>
         /// <param name="handle"></param>
         public void RemoveEffect(AbilityEffectHandle handle);
+        public bool HasTags(params string[] tags);
+        public List<AbilityEffectHandle> GetEffects<T>() where T : AbilityEffectBase;
+        public List<AbilityHandle> GetAbilities<T>() where T : AbilityBase;
 
     }
 

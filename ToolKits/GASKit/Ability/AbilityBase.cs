@@ -12,23 +12,23 @@ namespace Lost.Ability
     /// 调用OnExecute()调用执行，OnUpdate()调用更新
     /// 执行技能的时候也可以释放特效
     /// </summary>
-    public abstract class AbilityBase
+    public abstract class AbilityBase : MonoBehaviour
     {
-
+        [HideInInspector]
         public AbilitySystemComponent owner;
         /// <summary>
         /// 是否正在执行
         /// </summary>
         private bool isExecuting = false;
         private bool isExit = false;
-        protected List<AbilityTag> abilityTags = new List<AbilityTag>();
-        protected List<AbilityTag> blockTags = new List<AbilityTag>();
+        protected List<string> abilityTags = new List<string>();
+        protected List<string> blockTags = new List<string>();
         private Coroutine executeCoroutine;
         /// <summary>
         /// 获取技能标签
         /// </summary>
         /// <returns></returns>
-        public List<AbilityTag> GetAbilityTags()
+        public List<string> GetAbilityTags()
         {
             return abilityTags.ToList();
         }
@@ -37,7 +37,7 @@ namespace Lost.Ability
         /// 如果技能系统中有该标签存在，技能将无法释放
         /// </summary>
         /// <returns></returns>
-        public List<AbilityTag> GetBlockTags()
+        public List<string> GetBlockTags()
         {
             return blockTags.ToList();
         }
@@ -148,14 +148,19 @@ namespace Lost.Ability
     {
         public AbilityBase ability;
 
-        public bool IsRunning()
+        public bool IsRunning
         {
-            if (ability == null)
+            get
             {
-                return false;
+                if (ability == null)
+                {
+                    return false;
+                }
+                return !ability.IsExit();
             }
-            return !ability.IsExit();
         }
+
+
     }
 }
 

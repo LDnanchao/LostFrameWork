@@ -8,43 +8,50 @@ namespace Lost.AI
     {
         public CharacterControllerBase characterController;
         public string aiType;
-        [HideInInspector]
-        public string currentState;
         public virtual void Update()
         {
             if (isRunAI)
             {
                 _aiFSM.Update();
-                currentState = _aiFSM.GetCurrentState();
             }
- 
+
             if (isMoving)
             {
-                Vector3 direction = isPositionTarget ? targetPosition - transform.position : targetTransform.position - transform.position;
-                characterController.Move(direction.normalized);
-
-                if (Vector3.Distance(transform.position, isPositionTarget ? targetPosition : targetTransform.position) < distance)
+                if (!isPositionTarget && targetTransform == null)
                 {
                     MoveComplete();
                 }
+                else
+                {
+                    Vector3 direction = isPositionTarget ? targetPosition - transform.position : targetTransform.position - transform.position;
+                    characterController.Move(direction.normalized);
+
+                    if (Vector3.Distance(transform.position, isPositionTarget ? targetPosition : targetTransform.position) < distance)
+                    {
+                        MoveComplete();
+                    }
+                }
+
             }
 
         }
-       
-       public virtual void SetCharacterController(CharacterControllerBase characterController){
-           this.characterController = characterController;
-       }
-       public virtual CharacterControllerBase GetCharacterController(){
-           return characterController;
-       }
+
+        public virtual void SetCharacterController(CharacterControllerBase characterController)
+        {
+            this.characterController = characterController;
+        }
+        public virtual CharacterControllerBase GetCharacterController()
+        {
+            return characterController;
+        }
 
         #region  Movement
-        private bool isMoving = false;
-        private bool isPositionTarget = false;
-        private Vector3 targetPosition;
-        private Transform targetTransform;
-        float distance = 0.1f;
-        public void MoveToTarget(Transform target,float distance = 0.1f)
+        protected bool isMoving = false;
+        protected bool isPositionTarget = false;
+        protected Vector3 targetPosition;
+        protected Transform targetTransform;
+        protected float distance = 0.1f;
+        public void MoveToTarget(Transform target, float distance = 0.1f)
         {
             this.distance = distance;
             isMoving = true;
@@ -59,13 +66,13 @@ namespace Lost.AI
             targetPosition = position;
         }
 
-        public void StopMove()
+        public virtual void StopMove()
         {
             isMoving = false;
             characterController.Move(Vector3.zero);
         }
 
-        private void MoveComplete()
+        protected virtual void MoveComplete()
         {
             isMoving = false;
             characterController.Move(Vector3.zero);
@@ -73,8 +80,8 @@ namespace Lost.AI
         #endregion
 
         #region  AI
-        private IAIFSM _aiFSM;
-        private bool isRunAI = false;
+        protected IAIFSM _aiFSM;
+        protected bool isRunAI = false;
 
 
         /// <summary>
@@ -101,6 +108,6 @@ namespace Lost.AI
 
         #endregion
 
-      
+
     }
 }

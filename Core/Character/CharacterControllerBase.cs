@@ -12,7 +12,7 @@ namespace Lost.Character
         /// 动画控制器
         /// </summary>
         public AbstractCharacterAnimateController animateController;
-
+        
        
         /// <summary>
         /// 是否存活

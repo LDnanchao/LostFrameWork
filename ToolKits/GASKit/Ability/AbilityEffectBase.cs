@@ -20,31 +20,40 @@ namespace Lost.Ability
         /// 效果影响者
         /// </summary>
         public AbilitySystemComponent target;
-        protected List<AbilityTag> abilityTags = new List<AbilityTag>();
+        protected List<string> abilityTags = new List<string>();
+        protected List<string> blockTags = new List<string>();
+        private bool _isExecuting = false;
 
-        public List<AbilityTag> GetAbilityTags()
+        public List<string> GetAbilityTags()
         {
             return abilityTags.ToList();
         }
-        /// <summary>
-        /// 中断技能
-        /// </summary>
-        public abstract void InterruptEffect();
-        public abstract void EndEffect();
 
-        public void OnApply()
-        {
-            Apply();
+        public List<string> GetBlockTags(){
+            return blockTags.ToList();
         }
-        public abstract void Apply();
+
+        public void FinishEffect()
+        {
+            _isExecuting = false;
+        }
+        public abstract void Exit();
+
+        public void OnExecute()
+        {
+            _isExecuting = true;
+            Execute();
+        }
+        public abstract void Execute();
 
         internal void OnUpdate()
         {
+            if (!_isExecuting) return;
             Update();
         }
         public abstract void Update();
 
-        internal AbilityEffectHandle Init(AbilitySystemComponent owner, AbilitySystemComponent target)
+        public AbilityEffectHandle Init(AbilitySystemComponent owner, AbilitySystemComponent target)
         {
             this.source = owner;
             this.target = target;
@@ -52,27 +61,32 @@ namespace Lost.Ability
             handle.effect = this;
             return handle;
         }
+
+        public bool isExecuting()
+        {
+            return _isExecuting;
+        }
+
+        public void OnExit()
+        {
+            Exit();
+        }
     }
 
     public class CustomAbilityEffect : AbilityEffectBase
     {
         public Action applyAction;
         public Action updateAction;
+        public Action exitAction;
 
-
-        public override void Apply()
+        public override void Execute()
         {
             applyAction?.Invoke();
         }
 
-        public override void EndEffect()
+        public override void Exit()
         {
-
-        }
-
-        public override void InterruptEffect()
-        {
-
+            exitAction?.Invoke();
         }
 
         public override void Update()

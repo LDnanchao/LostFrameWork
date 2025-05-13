@@ -12,8 +12,10 @@ namespace Lost.Ability
         private List<AbilityHandle> activeAbilities = new List<AbilityHandle>();
         private List<AbilityEffectHandle> activeEffects = new List<AbilityEffectHandle>();
         [SerializeField]
-        private List<AbilityTag> abilityTags = new List<AbilityTag>();
+        private List<string> abilityTags = new List<string>();
         public List<string> currentAbilityNames = new List<string>();
+
+        private Dictionary<string, List<GamePlayCueBase>> gamePlayCues = new Dictionary<string, List<GamePlayCueBase>>();
         public void ApplyAbility<T>() where T : AbilityBase, new()
         {
             AbilityBase ability = new T();
@@ -28,7 +30,7 @@ namespace Lost.Ability
                 return;
             }
             activeAbilities.Add(handle);
-            AddAbilityTags(handle);
+            AddAbilityTags(handle,true);
             handle.ability.OnExecute();
         }
 
@@ -36,7 +38,7 @@ namespace Lost.Ability
         {
             if (!ownAbilities.Contains(handle))
             {
-                Debug.Log("Ability not owned by this component");
+                Debug.LogError("Ability not owned by this component");
                 return false;
             }
             var blockTags = handle.ability.GetBlockTags();
@@ -45,14 +47,26 @@ namespace Lost.Ability
             {
                 if (activeTags.Contains(blockTag))
                 {
-                    Debug.Log("Ability blocked by another ability" + "BlockTag: " + blockTag);
+                    Debug.LogError("Ability blocked by another ability" + "BlockTag: " + blockTag);
                     return false;
                 }
 
             }
             return true;
         }
+        public bool HasTags(params string[] tags)
+        {
+            var activeTags = GetAbilityTags();
+            foreach (var tag in tags)
+            {
+                if (activeTags.Contains(tag))
+                {
+                    return true;
+                }
 
+            }
+            return false;
+        }
         public AbilityEffectHandle ApplyEffectToOwner<T>() where T : AbilityEffectBase, new()
         {
             AbilityEffectBase effect = new T();
@@ -63,8 +77,8 @@ namespace Lost.Ability
         {
             AbilityEffectHandle handle = effect.Init(this, this);
             activeEffects.Add(handle);
-            AddAbilityTags(handle);
-            effect.OnApply();
+            AddAbilityTags(handle,true);
+            effect.OnExecute();
             return handle;
         }
 
@@ -78,12 +92,12 @@ namespace Lost.Ability
         {
             AbilityEffectHandle handle = effect.Init(this, target);
             target.activeEffects.Add(handle);
-            target.AddAbilityTags(handle);
-            effect.OnApply();
+            target.AddAbilityTags(handle,true);
+            effect.OnExecute();
             return handle;
         }
 
-        public List<AbilityTag> GetAbilityTags()
+        public List<string> GetAbilityTags()
         {
             return abilityTags.ToList();
         }
@@ -110,7 +124,11 @@ namespace Lost.Ability
             if (activeAbilities.Contains(handle))
             {
                 activeAbilities.Remove(handle);
-                handle.ability.FinishAbility();
+                if (handle.ability.IsExecute())
+                {
+                    handle.ability.FinishAbility();
+                }
+
                 handle.ability.OnExit();
             }
         }
@@ -132,7 +150,11 @@ namespace Lost.Ability
         {
             if (!activeEffects.Contains(handle)) return;
             activeEffects.Remove(handle);
-            handle.effect.InterruptEffect();
+            if (handle.effect.isExecuting())
+            {
+                handle.effect.FinishEffect();
+            }
+            handle.effect.OnExit();
         }
         public void RemoveEffect<T>() where T : AbilityEffectBase, new()
         {
@@ -154,63 +176,170 @@ namespace Lost.Ability
             List<AbilityHandle> unExecutedAbilities = new List<AbilityHandle>();
             foreach (AbilityHandle handle in activeAbilities)
             {
-                handle.ability.OnUpdate();
-                if (!handle.ability.IsExecute())
+
+                if (handle.ability.IsExecute())
+                {
+                    handle.ability.OnUpdate();
+                }
+                else
                 {
                     unExecutedAbilities.Add(handle);
                 }
             }
+            List<AbilityEffectHandle> unExecutedEffects = new List<AbilityEffectHandle>();
             foreach (AbilityEffectHandle handle in activeEffects)
             {
-                handle.effect.OnUpdate();
+                if (!handle.effect.isExecuting())
+                {
+                    unExecutedEffects.Add(handle);
+                }
+                else
+                {
+                    handle.effect.OnUpdate();
+                }
             }
             foreach (AbilityHandle handle in unExecutedAbilities)
             {
                 activeAbilities.Remove(handle);
                 handle.ability.OnExit();
+                // RemoveAbility(handle);
+            }
+            foreach (AbilityEffectHandle handle in unExecutedEffects)
+            {
+                RemoveEffect(handle);
             }
             UpdateAbilityTags();
         }
         /// <summary>
         /// 刷新所有能力的标签
         /// </summary>
-        private void UpdateAbilityTags(){
+        private void UpdateAbilityTags()
+        {
+            var beforeTags = abilityTags.ToList();
             abilityTags.Clear();
             foreach (AbilityHandle handle in activeAbilities)
             {
                 AddAbilityTags(handle);
             }
-             foreach (AbilityEffectHandle handle in activeEffects)
+            foreach (AbilityEffectHandle handle in activeEffects)
             {
                 AddAbilityTags(handle);
             }
-        }
-        private void AddAbilityTags(AbilityEffectHandle handle)
-        {
-            var effect = handle.effect;
-            foreach (AbilityTag tag in effect.GetAbilityTags())
+            foreach (var tag in abilityTags)
             {
-                if (!abilityTags.Contains(tag)) abilityTags.Add(tag);
+                OnRefreshTag(tag);
+            }
+            foreach (var tag in beforeTags)
+            {
+                if (!abilityTags.Contains(tag))
+                {
+                    OnRemoveTag(tag);
+                }
             }
         }
 
-        private void AddAbilityTags(AbilityHandle handle)
+        private void OnRemoveTag(string tag)
+        {
+            if (gamePlayCues.ContainsKey(tag))
+            {
+                var cues = gamePlayCues[tag];
+                foreach (var cue in cues)
+                {
+                    cue.OnExit();
+                }
+                cues.Clear();
+            }
+        }
+
+        private void OnRefreshTag(string tag)
+        {
+            if (gamePlayCues.ContainsKey(tag))
+            {
+                var cues = gamePlayCues[tag];
+                foreach (var cue in cues)
+                {
+                    cue.OnUpdate();
+                }
+            }
+        }
+
+        private void OnNewTag(string tag)
+        {
+            if (!gamePlayCues.ContainsKey(tag))
+            {
+                gamePlayCues.Add(tag, new List<GamePlayCueBase>());
+            }
+            var cues = gamePlayCues[tag];
+            cues.AddRange(GamePlayCueManager.Instance.GetGamePlayCues(tag));
+            foreach (var cue in cues)
+            {
+                cue.owner = this;
+                cue.OnExecute();
+            }
+        }
+
+        private void AddAbilityTags(AbilityEffectHandle handle, bool trigger = false)
+        {
+            var effect = handle.effect;
+            foreach (string tag in effect.GetAbilityTags())
+            {
+                if (!abilityTags.Contains(tag))
+                {
+                    abilityTags.Add(tag);
+                    if (trigger) OnNewTag(tag);
+                }
+            }
+        }
+
+        private void AddAbilityTags(AbilityHandle handle, bool trigger = false)
         {
             var ability = handle.ability;
-            foreach (AbilityTag tag in ability.GetAbilityTags())
+            foreach (string tag in ability.GetAbilityTags())
             {
-                if (!abilityTags.Contains(tag)) abilityTags.Add(tag);
+                if (!abilityTags.Contains(tag))
+                {
+                    abilityTags.Add(tag);
+                    if (trigger) OnNewTag(tag);
+                }
             }
         }
 
         public void StopAbility()
         {
-            foreach (AbilityHandle handle in activeAbilities){
+            foreach (AbilityHandle handle in activeAbilities)
+            {
                 handle.ability.FinishAbility();
                 handle.ability.OnExit();
             }
             activeAbilities.Clear();
         }
-    }
 
+        public List<AbilityEffectHandle> GetEffects<T>() where T : AbilityEffectBase
+        {
+            List<AbilityEffectHandle> result = new List<AbilityEffectHandle>();
+            foreach (AbilityEffectHandle handle in activeEffects)
+            {
+                if (handle.effect is T)
+                {
+                    result.Add(handle);
+                }
+            }
+            return result;
+        }
+
+        public List<AbilityHandle> GetAbilities<T>() where T : AbilityBase
+        {
+            List<AbilityHandle> result = new List<AbilityHandle>();
+            foreach (AbilityHandle handle in activeAbilities)
+            {
+                if (handle.ability is T)
+                {
+                    result.Add(handle);
+                }
+            }
+            return result;
+        }
+    }
 }
+
+
