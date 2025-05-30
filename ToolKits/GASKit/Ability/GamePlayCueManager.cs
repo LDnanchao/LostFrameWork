@@ -1,9 +1,8 @@
+using QFramework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
-using QFramework;
 using UnityEngine;
 
 public class GamePlayCueManager : Singleton<GamePlayCueManager>
@@ -12,6 +11,7 @@ public class GamePlayCueManager : Singleton<GamePlayCueManager>
     private GamePlayCueManager() { }
 
     private Dictionary<string, List<Type>> mCues = new Dictionary<string, List<Type>>();
+
     public override void OnSingletonInit()
     {
         //获得当前运行的程序集
@@ -19,6 +19,7 @@ public class GamePlayCueManager : Singleton<GamePlayCueManager>
         Debug.Log("GamePlayCueManager: assemblies count: " + assemblies.Length);
         Init(assemblies);
     }
+
     private void Init(params Assembly[] assemblies)
     {
         foreach (Assembly assembly in assemblies)
