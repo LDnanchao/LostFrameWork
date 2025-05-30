@@ -11,13 +11,13 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [
-        "FANTASY"
+        "ENABLE"
     ],
     "versionDefines": [
         {
             "name": "com.fantasy.configtable",
             "expression": "",
-            "define": "FANTASY"
+            "define": "ENABLE"
         }
     ],
     "noEngineReferences": false

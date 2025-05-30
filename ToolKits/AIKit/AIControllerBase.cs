@@ -56,6 +56,7 @@ namespace Lost.AI
         protected Vector3 targetPosition;
         protected Transform targetTransform;
         protected float distance = 0.1f;
+        public bool IsMoving => isMoving;
         public void MoveToTarget(Transform target, float distance = 0.1f)
         {
             this.distance = distance;

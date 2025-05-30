@@ -32,7 +32,7 @@ public class AutoSliceSpriteSheetWithXML : AssetPostprocessor
             string target_path = (doc.FirstChild as XmlElement).GetAttribute("imagePath");
             if (target_path != fileName_without_extension + extension)
             {
-                throw new System.Exception($"imagePath is {target_path}, but current file is {fileName_without_extension + extension}, please check the xml file");
+                target_path = fileName_without_extension + extension;
             }
             // Texture2D texture2D =  context.mainObject as Texture2D;
             
