@@ -6,8 +6,13 @@ namespace Lost.AI
 {
     public class AIControllerBase : MonoBehaviour
     {
+        [HideInInspector]
         public CharacterControllerBase characterController;
         public string aiType;
+        protected virtual void Awake()
+        {
+            characterController = GetComponent<CharacterControllerBase>();
+        }
         public virtual void Update()
         {
             if (isRunAI)
