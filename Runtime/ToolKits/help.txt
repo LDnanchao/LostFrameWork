@@ -1,4 +1,0 @@
-﻿Project Setting-Player-Script Compilation-Scripting Define Symbols中添加对应指令开启功能
-
-I10nKit:ENBLE_I2
-GASKit:ENBLE_GAS
